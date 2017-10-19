@@ -1,6 +1,4 @@
-# GETHiQL postgres schema
-
-## how to install (mac)
-* `brew install psql`
-* `./initdb.sh`
-* `psql gethiql_db` to start the psql shell
+# GETHiQL postgres
+* `./install.sh` to install on ubuntu
+* `./initdb.sh` to create user, create db, create tables
+* `psql.sh` to connect to postgres with correct user

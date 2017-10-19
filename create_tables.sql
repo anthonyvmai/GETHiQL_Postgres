@@ -1,4 +1,6 @@
+DROP TABLE IF EXISTS transaction;
 DROP TABLE IF EXISTS block;
+
 CREATE TABLE block (
     height integer PRIMARY KEY,
     timestamp date,
@@ -18,7 +20,6 @@ CREATE TABLE block (
     receiptsRoot text
 );
 
-DROP TABLE IF EXISTS transaction;
 CREATE TABLE transaction (
     transactionHash text PRIMARY KEY,
     blockNumber integer REFERENCES block (height),
