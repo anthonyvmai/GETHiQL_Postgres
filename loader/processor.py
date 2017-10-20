@@ -26,7 +26,6 @@ def process_block(block_number):
 #     process_block(block_number)
 #     return "Success!"
 
-
 # """ Reads block number from argv and loads block """
 # def process():
 #     if len(sys.argv) != 2:
