@@ -20,17 +20,26 @@ def process_block(block_number):
         except psycopg2.IntegrityError:
             print("Transaction <{}> already loaded".format(tx_hash))
 
-""" Processes blocks as per CLI args """
-def process():
+""" Processes given number of blocks from starting_block """
+def process(starting_block, blocks):
+    for i in range(0, blocks):
+        process_block(starting_block + i)
+        print("Processed block <{}>".format(starting_block + i))
+
+
+""" Processes blocks from starting_block to ending_block, inclusive """
+def process_range(starting_block, ending_block):
+    for i in range(starting_block, ending_block + 1):
+        process_block(i)
+        print("Processed block <{}>".format(i))
+
+
+if __name__ == '__main__':
+    """ Processes blocks as per CLI args """
     if len(sys.argv) != 3:
         print("Pass block number and number of blocks as arguments")
-        return
+        exit(1)
 
-    block_number = int(sys.argv[1])
+    starting_block = int(sys.argv[1])
     blocks = int(sys.argv[2])
-    
-    for i in range(0, blocks):
-        process_block(block_number + i)
-        print("Processed block <{}>".format(block_number + i))
-
-process()
+    process(starting_block, blocks)

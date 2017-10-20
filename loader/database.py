@@ -140,6 +140,28 @@ def create_transactions_table():
     """
     _execute_create(sql)
 
+
+def max_block():
+    """Get max block number in our database."""
+    sql = """SELECT max(height) from blocks"""
+    # print(sql)
+    result = _execute_select(sql)
+    row = result[0]
+    return row[0]
+
+
+def last_block():
+    sql = """
+    SELECT * from blocks
+        where height=(
+            SELECT max(height) from blocks
+        )
+    """
+    result = _execute_select(sql)
+    row = result[0]
+    return row
+
+
 """ Executes an insert transaction """
 def _execute_insert(sql, desc):
     cursor = postgres.cursor()
@@ -148,6 +170,16 @@ def _execute_insert(sql, desc):
     finally:
         postgres.commit()
         cursor.close()
+
+""" Executes a select, returns all rows """
+def _execute_select(sql):
+    result = None
+    with postgres.cursor() as cursor:
+        cursor.execute(sql)
+        # print(cursor)
+        result = cursor.fetchall()
+    return result
+
 
 """ Executes a create table """
 def _execute_create(sql):
