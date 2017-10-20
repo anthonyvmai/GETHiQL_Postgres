@@ -12,7 +12,5 @@ echo "Creating tables from $create_tables"
 psql -d $db -f $create_tables
 echo "Creating psql user $user with password $pass"
 psql -c "CREATE USER $user WITH PASSWORD '$pass';"
-psql -c "GRANT ALL PRIVILEGES ON DATABASE $db TO $user;"
-psql -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA PUBLIC TO $user;"
-psql -c "GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA PUBLIC TO $user;"
+psql -c "ALTER USER $user WITH SUPERUSER;"
 echo "done"
