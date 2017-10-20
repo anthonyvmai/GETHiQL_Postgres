@@ -1,11 +1,17 @@
 import psycopg2
 
 """ Database connection object """
+# postgres = psycopg2.connect(
+#     dbname='gethiql_db',
+#     user='gethiql_user',
+#     host='localhost',
+#     password='foobar123'
+# )
 postgres = psycopg2.connect(
-    dbname='gethiql_db',
-    user='gethiql_user',
-    host='localhost',
-    password='foobar123'
+    dbname='ethiqldatabase',
+    user='ethiqlusername',
+    host='ethiqldatabase.cle9ykpn9ppr.us-east-1.rds.amazonaws.com',
+    password='XXX'
 )
 
 """ Saves a row to table blocks """
@@ -86,6 +92,54 @@ def save_transaction(tx_info):
     """
     _execute_insert(sql, tx_info)
 
+""" Creates blocks table """
+def create_blocks_table():
+    sql = """
+        DROP TABLE IF EXISTS blocks;
+        CREATE TABLE blocks (
+            height integer PRIMARY KEY,
+            block_time timestamp,
+            hash text,
+            parent_hash text,
+            miner text,
+            difficulty numeric(32),
+            total_difficulty numeric(32),
+            size integer,
+            gas_used integer,
+            gas_limit integer,
+            nonce text,
+            transactions_root text,
+            state_root text,
+            receipts_root text,
+            transactions_count integer,
+            uncles_count integer
+        );
+    """
+    _execute_create(sql)
+
+""" Creates transactions table """
+def create_transactions_table():
+    sql = """
+        DROP TABLE IF EXISTS transactions;
+        CREATE TABLE transactions (
+            transaction_hash text PRIMARY KEY,
+            block_height integer REFERENCES blocks(height),
+            from_address text,
+            to_address text,
+            value numeric(32),
+            gas_limit integer,
+            gas_used integer,
+            gas_price numeric(32),
+            cumulative_gas_used integer,
+            nonce integer,
+            transaction_index integer,
+            created_contract_address text,
+            input text,
+            logs_count integer
+        );
+    """
+    _execute_create(sql)
+
 """ Executes an insert transaction """
 def _execute_insert(sql, desc):
     cursor = postgres.cursor()
@@ -93,3 +147,13 @@ def _execute_insert(sql, desc):
         cursor.execute(sql, desc)
     finally:
         postgres.commit()
+        cursor.close()
+
+""" Executes a create table """
+def _execute_create(sql):
+    cursor = postgres.cursor()
+    try:
+        cursor.execute(sql)
+    finally:
+        postgres.commit()
+        cursor.close()
