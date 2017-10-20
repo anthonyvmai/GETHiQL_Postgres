@@ -1,38 +1,44 @@
-DROP TABLE IF EXISTS transaction;
-DROP TABLE IF EXISTS block;
+DROP TABLE IF EXISTS transactions;
+DROP TABLE IF EXISTS blocks;
 
-CREATE TABLE block (
+CREATE TABLE blocks (
     height integer PRIMARY KEY,
-    timestamp date,
+    block_time timestamp,
     hash text,
-    parentHash text,
+    parent_hash text,
     miner text,
-    difficulty double precision,
-    totalDifficulty double precision,
+    difficulty numeric(32),
+    total_difficulty numeric(32),
     size integer,
-    gasUsed integer,
-    gasLimit integer,
-    nonce integer,
-    blockReward integer,
-    unclesReward integer,
-    transactionsRoot text,
-    stateRoot text,
-    receiptsRoot text
+    gas_used integer,
+    gas_limit integer,
+    nonce text,
+    transactions_root text,
+    state_root text,
+    receipts_root text,
+    transactions_count integer,
+    uncles_count integer
 );
 
-CREATE TABLE transaction (
-    transactionHash text PRIMARY KEY,
-    blockNumber integer REFERENCES block (height),
-    timestamp text,
-    fromAddress text,
-    toAddress text,
-    value integer,
-    gasLimit integer,
-    gasUsedByTxn integer,
-    gasPrice integer,
-    actualTxFee integer,
-    cumulativeGasUsed integer,
-    txtReciptStatus text,
+CREATE TABLE transactions (
+    transaction_hash text PRIMARY KEY,
+    block_height integer REFERENCES blocks(height),
+    from_address text,
+    to_address text,
+    value numeric(32),
+    gas_limit integer,
+    gas_used integer,
+    gas_price numeric(32),
+    cumulative_gas_used integer,
     nonce integer,
-    inputData text
+    transaction_index integer,
+    created_contract_address text,
+    input text,
+    logs_count integer
 );
+
+GRANT ALL PRIVILEGES ON DATABASE gethiql_db TO gethiql_user;
+
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA PUBLIC TO gethiql_user;
+
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA PUBLIC TO gethiql_user;
