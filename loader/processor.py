@@ -20,12 +20,19 @@ def process_block(block_number):
         except psycopg2.IntegrityError:
             print("Transaction <{}> already loaded".format(tx_hash))
 
-""" Reads block number from argv and loads block """
-def process():
-    if len(sys.argv) != 2:
-        print("Pass block number as argument")
-        return
-    block_number = int(sys.argv[1])
+def event_handler(event, context):
+    block_number = int(event["block"])
+    print("Processing block <{}>".format(block_number))
     process_block(block_number)
+    return "Success!"
 
-process()
+
+# """ Reads block number from argv and loads block """
+# def process():
+#     if len(sys.argv) != 2:
+#         print("Pass block number as argument")
+#         return
+#     block_number = int(sys.argv[1])
+#     process_block(block_number)
+#
+# process()

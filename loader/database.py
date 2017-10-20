@@ -11,7 +11,7 @@ postgres = psycopg2.connect(
     dbname='ethiqldatabase',
     user='ethiqlusername',
     host='ethiqldatabase.cle9ykpn9ppr.us-east-1.rds.amazonaws.com',
-    password='XXX'
+    password='SnakeyMalakey123'
 )
 
 """ Saves a row to table blocks """
