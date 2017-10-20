@@ -36,9 +36,3 @@ CREATE TABLE transactions (
     input text,
     logs_count integer
 );
-
-GRANT ALL PRIVILEGES ON DATABASE gethiql_db TO gethiql_user;
-
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA PUBLIC TO gethiql_user;
-
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA PUBLIC TO gethiql_user;
