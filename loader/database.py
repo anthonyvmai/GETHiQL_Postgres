@@ -92,6 +92,25 @@ def save_transaction(tx_info):
     """
     _execute_insert(sql, tx_info)
 
+""" """
+def save_log(log):
+    sql = """
+        INSERT INTO logs(
+            contract_address,
+            transaction_hash,
+            name,
+            log_index,
+            payload
+        ) VALUES (
+            %(contract_address)s,
+            %(tx_hash)s,
+            %(name)s,
+            %(log_index)s,
+            %(json)s
+        )
+    """
+    _execute_insert(sql, log)
+
 """ Creates blocks table """
 def create_blocks_table():
     sql = """
@@ -140,6 +159,20 @@ def create_transactions_table():
     """
     _execute_create(sql)
 
+""" """
+def create_logs_table():
+    sql = """
+        DROP TABLE IF EXISTS logs;
+        CREATE TABLE logs (
+            log_index integer,
+            transaction_hash text,
+            contract_address text,
+            name text,
+            payload jsonb,
+            PRIMARY KEY (log_index, transaction_hash)
+        );
+    """
+    _execute_create(sql)
 
 def max_block():
     """Get max block number in our database."""
@@ -148,7 +181,6 @@ def max_block():
     result = _execute_select(sql)
     row = result[0]
     return row[0]
-
 
 def last_block():
     sql = """
@@ -160,7 +192,6 @@ def last_block():
     result = _execute_select(sql)
     row = result[0]
     return row
-
 
 """ Executes an insert transaction """
 def _execute_insert(sql, desc):

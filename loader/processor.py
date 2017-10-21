@@ -20,6 +20,12 @@ def process_block(block_number):
         except psycopg2.IntegrityError:
             print("Transaction <{}> already loaded".format(tx_hash))
 
+        for log in tx["logs"]:
+            try:
+                database.save_log(log)
+            except psycopg2.IntegrityError:
+                print("Log <{}> in tx <{}>".format(log["log_index"], tx_hash))
+
 """ Processes given number of blocks from starting_block """
 def process(starting_block, blocks):
     for i in range(0, blocks):

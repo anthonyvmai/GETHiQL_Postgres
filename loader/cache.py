@@ -7,4 +7,8 @@ def set(key, val):
 
 """ Get a cached value """
 def get(key):
-    return CACHE.get(key, None)
+    return CACHE.get(key)
+
+""" Check if key exists in cache """
+def has_key(key):
+    return key in CACHE
