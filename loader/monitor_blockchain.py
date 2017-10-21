@@ -7,41 +7,91 @@ import database
 
 web3 = scraper.web3
 
+def recent_blocks(start, max_block):
+    """Generator of block numbers starting from a specific block."""
+    for i in range(start, max_block):
+        yield i
+
+
+def unseen_blocks(max_block):
+    start = database.max_block() + 1
+    print('First unseen block: {:,}'.format(start))
+    for i in range(start, max_block):
+        yield i
+
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Continuously look for the latest block')
+    parser = argparse.ArgumentParser(description='Continuously look for the target_block block')
+    parser.add_argument('--starting-block', type=int, default=0,
+                        help='Optionally start from a specific block')
     parser.add_argument('--interval', type=int, default=15, help='Polling interval')
     parser.add_argument('--batch-size', type=int, default=0,
                         help='Batch size: 0 to process all available')
+    parser.add_argument('--block-cap', type=int, default=5,
+                        help='Number of blocks to stay behind the tip')
+    parser.add_argument('--dry-run', '-n', action='store_true', default=False)
     args = parser.parse_args()
 
+    starting_block = args.starting_block
     polling_interval = args.interval
     batch_size = args.batch_size
+    block_cap = args.block_cap
+    dry_run = args.dry_run
 
-    while True:
-        try:
-            latest = web3.eth.blockNumber
-            print('latest block: {:,}'.format(latest))
+    print(args)
+    # exit(1)
 
-            last_seen = database.max_block()
-            print('last seen: {:,}'.format(last_seen))
+    def targets():
+        tip = web3.eth.blockNumber
+        target = tip - block_cap
+        print('latest block: {:,}'.format(tip))
+        print('target block: {:,}'.format(target))
 
-            # print(database.last_block())
+        return tip, target
 
-            # if the latest block is greater than our latest block, fetch data
-            if latest > last_seen:
-                first = last_seen + 1
+    def process(i):
+        if not dry_run:
+            processor.process_block(i)
+        else:
+            print('process {}'.format(i))
 
-                if batch_size == 0:
-                    to_process = latest - first
-                else:
-                    to_process = min(latest - first, batch_size)
+    last_seen = None
+    latest, target_block = targets()
 
-                print('Processing {:,} blocks...'.format(to_process))
-                processor.process(first, to_process)
-                last_seen += to_process
+    # start from a specific block
+    if starting_block > 0:
+        if starting_block > target_block:
+            print('starting block must be before target: {:,}'.format(target_block))
+            exit(1)
 
-            time.sleep(polling_interval)
-        except KeyboardInterrupt:
-            print('interrupted, exiting...')
-            break
+        last_seen = starting_block - 1
+        while True:
+            try:
+                latest, target_block = targets()
+                # print('latest block: {:,}'.format(latest))
+                # print('target block: {:,}'.format(target_block))
+
+                print('process blocks from {} to {}'.format(last_seen + 1, target_block))
+                for i in recent_blocks(last_seen + 1, target_block):
+                    process(i)
+                    last_seen = i
+                time.sleep(polling_interval)
+            except KeyboardInterrupt:
+                print('interrupted, exiting...')
+                break
+    else:
+        # just start from the latest in the database
+        print('processing from latest in database')
+        while True:
+            try:
+                latest, target_block = targets()
+                # print('latest block: {:,}'.format(latest))
+                # print('process blocks until: {:,}'.format(target_block))
+
+                for i in unseen_blocks(target_block):
+                    process(i)
+
+                time.sleep(polling_interval)
+            except KeyboardInterrupt:
+                print('interrupted, exiting...')
+                break
