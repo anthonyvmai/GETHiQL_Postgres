@@ -24,10 +24,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Continuously look for the target_block block')
     parser.add_argument('--starting-block', type=int, default=0,
                         help='Optionally start from a specific block')
+    parser.add_argument('--latest', action='store_true', default=False)
     parser.add_argument('--interval', type=int, default=15, help='Polling interval')
     parser.add_argument('--batch-size', type=int, default=0,
                         help='Batch size: 0 to process all available')
-    parser.add_argument('--block-cap', type=int, default=5,
+    parser.add_argument('--block-cap', '--confirmations', type=int, default=5,
                         help='Number of blocks to stay behind the tip')
     parser.add_argument('--dry-run', '-n', action='store_true', default=False)
     args = parser.parse_args()
@@ -52,24 +53,25 @@ if __name__ == '__main__':
     def process(i):
         if not dry_run:
             processor.process_block(i)
+            print("Processed block <{}>".format(i))
         else:
             print('process {}'.format(i))
 
     last_seen = None
     latest, target_block = targets()
 
-    # start from a specific block
+    # start from a specific block, or latest
+    if args.latest:
+        starting_block = latest
+
     if starting_block > 0:
         if starting_block > target_block:
-            print('starting block must be before target: {:,}'.format(target_block))
-            exit(1)
+            starting_block = target_block
 
         last_seen = starting_block - 1
         while True:
             try:
                 latest, target_block = targets()
-                # print('latest block: {:,}'.format(latest))
-                # print('target block: {:,}'.format(target_block))
 
                 print('process blocks from {} to {}'.format(last_seen + 1, target_block))
                 for i in recent_blocks(last_seen + 1, target_block):
@@ -85,8 +87,6 @@ if __name__ == '__main__':
         while True:
             try:
                 latest, target_block = targets()
-                # print('latest block: {:,}'.format(latest))
-                # print('process blocks until: {:,}'.format(target_block))
 
                 for i in unseen_blocks(target_block):
                     process(i)
